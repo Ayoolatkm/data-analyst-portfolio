@@ -1,0 +1,23 @@
+-- SQL Data Cleaning Project
+
+-- 1. Remove duplicate records
+DELETE FROM patients
+WHERE id NOT IN (
+    SELECT MIN(id)
+    FROM patients
+    GROUP BY name, date_of_birth, email
+);
+
+-- 2. Standardize date formats
+UPDATE appointments
+SET appointment_date = STR_TO_DATE(appointment_date, '%d-%m-%Y')
+WHERE appointment_date LIKE '%-%-%';
+
+-- 3. Remove NULL or empty values
+DELETE FROM patients WHERE email IS NULL OR email = '';
+
+-- 4. Trim whitespace in text fields
+UPDATE patients
+SET name = TRIM(name),
+    email = TRIM(email),
+    phone = TRIM(phone);
