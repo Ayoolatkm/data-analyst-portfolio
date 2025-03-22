@@ -1,0 +1,31 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load Dataset
+file_path = "datasets/nhs_wait_times.csv"
+df = pd.read_csv(file_path)
+
+# Convert datetime columns
+df['arrival_time'] = pd.to_datetime(df['arrival_time'])
+df['seen_time'] = pd.to_datetime(df['seen_time'])
+df['appointment_date'] = pd.to_datetime(df['appointment_date'])
+
+# Calculate Wait Times
+df['wait_time_minutes'] = (df['seen_time'] - df['arrival_time']).dt.total_seconds() / 60
+
+# Average Wait Time Per Hospital
+hospital_wait = df.groupby('hospital_name')['wait_time_minutes'].mean().reset_index()
+plt.figure(figsize=(12, 6))
+sns.barplot(x='wait_time_minutes', y='hospital_name', data=hospital_wait, palette='coolwarm')
+plt.xlabel("Average Wait Time (minutes)")
+plt.ylabel("Hospital Name")
+plt.title("Average Patient Wait Time by Hospital")
+plt.show()
+
+# Percentage of Patients Waiting Over 4 Hours
+long_waits = (df['wait_time_minutes'] > 240).sum() / len(df) * 100
+print(f"Percentage of Patients Waiting Over 4 Hours: {long_waits:.2f}%")
+
+# Save processed data
+df.to_csv("datasets/nhs_wait_times_processed.csv", index=False)
