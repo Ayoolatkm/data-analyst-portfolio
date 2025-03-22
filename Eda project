@@ -1,0 +1,30 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load Dataset
+file_path = "datasets/eda_sample_data.csv"
+df = pd.read_csv(file_path)
+
+# Display basic dataset information
+print(df.info())
+print(df.describe())
+
+# Check for missing values
+missing_values = df.isnull().sum()
+print("Missing Values per Column:\n", missing_values)
+
+# Distribution of numerical features
+numerical_cols = df.select_dtypes(include=['int64', 'float64']).columns
+plt.figure(figsize=(12, 6))
+df[numerical_cols].hist(bins=30, figsize=(15, 10))
+plt.show()
+
+# Correlation matrix
+plt.figure(figsize=(10, 6))
+sns.heatmap(df.corr(), annot=True, cmap='coolwarm', fmt='.2f')
+plt.title("Feature Correlation Matrix")
+plt.show()
+
+# Save cleaned dataset
+df.to_csv("datasets/eda_sample_data_cleaned.csv", index=False)
