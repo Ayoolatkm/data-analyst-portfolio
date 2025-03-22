@@ -1,0 +1,37 @@
+-- SQL Queries for NHS Patient Wait Time Analysis
+
+-- 1. Calculate individual patient wait times
+SELECT patient_id, appointment_date, arrival_time, seen_time, 
+       TIMESTAMPDIFF(MINUTE, arrival_time, seen_time) AS wait_time_minutes
+FROM nhs_wait_times
+WHERE appointment_date BETWEEN '2024-01-01' AND '2024-12-31';
+
+-- 2. Average wait time per hospital
+SELECT hospital_name, AVG(TIMESTAMPDIFF(MINUTE, arrival_time, seen_time)) AS avg_wait_time
+FROM nhs_wait_times
+GROUP BY hospital_name
+ORDER BY avg_wait_time DESC;
+
+-- 3. Identify patients who waited over 4 hours
+SELECT patient_id, hospital_name, arrival_time, seen_time, 
+       TIMESTAMPDIFF(MINUTE, arrival_time, seen_time) AS wait_time_minutes
+FROM nhs_wait_times
+WHERE TIMESTAMPDIFF(MINUTE, arrival_time, seen_time) > 240;
+
+-- 4. Analyze peak wait time hours
+SELECT HOUR(arrival_time) AS hour_of_day, 
+       AVG(TIMESTAMPDIFF(MINUTE, arrival_time, seen_time)) AS avg_wait_time
+FROM nhs_wait_times
+GROUP BY hour_of_day
+ORDER BY avg_wait_time DESC;
+
+-- 5. Compare wait times by age group
+SELECT CASE 
+         WHEN age < 18 THEN 'Under 18'
+         WHEN age BETWEEN 18 AND 40 THEN '18-40'
+         WHEN age BETWEEN 41 AND 65 THEN '41-65'
+         ELSE '65+' END AS age_group, 
+       AVG(TIMESTAMPDIFF(MINUTE, arrival_time, seen_time)) AS avg_wait_time
+FROM nhs_wait_times
+GROUP BY age_group
+ORDER BY avg_wait_time DESC;
